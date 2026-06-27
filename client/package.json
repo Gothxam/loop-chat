@@ -8,7 +8,33 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "desktop": "electron ."
+    "desktop": "electron .",
+    "build:desktop": "electron-builder"
+  },
+  "build": {
+    "appId": "com.gothxam.loopchat",
+    "productName": "Loop Chat",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "src/app/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Loop Chat"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "public/**/*",
+      "src/app/favicon.ico"
+    ]
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -29,6 +55,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "electron": "^42.5.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
