@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Next.js production builds
+client/.next/
+client/out/
+client/dist/
+
+# Backend production builds
+server/dist/
+
+# Local uploaded files (images, documents, videos, voice)
+server/uploads/
+uploads/
+
+# Environment configurations and secrets
+.env
+.env.local
+*.local
+
+# System/OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
