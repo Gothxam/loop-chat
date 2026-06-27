@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
-const PROD_URL = 'https://loop-chat.vercel.app'; // Placeholder: Update this once Vercel URL is available
+const PROD_URL = 'https://loop-hole.vercel.app';
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
