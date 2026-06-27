@@ -1,5 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { User } from '../models/User.js';
+import { PushSubscription } from '../models/PushSubscription.js';
 import { AuthRequest } from '../middleware/auth.js';
 
 export const searchUsers = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -85,6 +86,54 @@ export const listAllUsers = async (req: AuthRequest, res: Response, next: NextFu
       .select('name email username photo status lastSeen');
 
     res.status(200).json({ users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const subscribePush = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const { subscription } = req.body;
+    if (!subscription || !subscription.endpoint || !subscription.keys) {
+      res.status(400).json({ message: 'Invalid subscription payload' });
+      return;
+    }
+
+    await PushSubscription.findOneAndUpdate(
+      { userId, 'subscription.endpoint': subscription.endpoint },
+      { userId, subscription },
+      { upsert: true, new: true }
+    );
+
+    res.status(201).json({ message: 'Subscribed to push notifications successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const unsubscribePush = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const { endpoint } = req.body;
+    if (!endpoint) {
+      res.status(400).json({ message: 'Endpoint is required to unsubscribe' });
+      return;
+    }
+
+    await PushSubscription.findOneAndDelete({ userId, 'subscription.endpoint': endpoint });
+
+    res.status(200).json({ message: 'Unsubscribed from push notifications successfully' });
   } catch (error) {
     next(error);
   }

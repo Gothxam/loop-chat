@@ -5,6 +5,45 @@ import { User } from '../models/User.js';
 import { Chat } from '../models/Chat.js';
 import { Message } from '../models/Message.js';
 import { MessageReceipt } from '../models/MessageReceipt.js';
+import webpush from 'web-push';
+import { PushSubscription } from '../models/PushSubscription.js';
+
+const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BCj0xzJ0CYFoki6Uy5LujHSM4_ZYRjnDhr9Q2E0cZqgGww1Ip6OrdY07uJ_0BZm-wke2Z52TRGNU1yV4UfH4Ysk';
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY || 'rdhJ_By8_IO6j9aupmU2J7Jj7jXSHMUhHbtmfidmYz4';
+
+webpush.setVapidDetails(
+  'mailto:support@loopchat.com',
+  publicVapidKey,
+  privateVapidKey
+);
+
+const triggerPushNotifications = async (recipientId: string, senderName: string, messageText: string, chatId: string) => {
+  try {
+    const subscriptions = await PushSubscription.find({ userId: recipientId });
+    if (!subscriptions || subscriptions.length === 0) return;
+
+    const payload = JSON.stringify({
+      title: senderName,
+      body: messageText,
+      chatId,
+    });
+
+    await Promise.all(
+      subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification(sub.subscription, payload);
+        } catch (err: any) {
+          // If subscription is expired or invalid (410 Gone / 404 Not Found), prune it
+          if (err.statusCode === 410 || err.statusCode === 404) {
+            await PushSubscription.findByIdAndDelete(sub._id);
+          }
+        }
+      })
+    );
+  } catch (err) {
+    console.error('Error triggering web push:', err);
+  }
+};
 
 interface DecodedToken {
   id: string;
@@ -136,6 +175,15 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
         // Broadcast to all participants
         participantIds.forEach((pId) => {
           io.to(pId).emit('message:receive', messageData);
+        });
+
+        // Trigger background push notifications for offline users (app closed)
+        participantIds.forEach((pId) => {
+          if (pId !== userId && !activeConnections.has(pId)) {
+            const senderName = (populatedMessage.senderId as any)?.name || 'New Message';
+            const displayMsg = populatedMessage.fileUrl ? '📎 Sent an attachment' : (message || '');
+            triggerPushNotifications(pId, senderName, displayMsg, chatId.toString());
+          }
         });
       } catch (err) {
         console.error('Error handling message:send:', err);

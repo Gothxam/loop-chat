@@ -77,11 +77,49 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
-    // Register Service Worker for push notifications
+    // Helper to subscribe client to push notifications
+    const subscribeToPush = async (reg: ServiceWorkerRegistration) => {
+      try {
+        let subscription = await reg.pushManager.getSubscription();
+        if (!subscription) {
+          const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BCj0xzJ0CYFoki6Uy5LujHSM4_ZYRjnDhr9Q2E0cZqgGww1Ip6OrdY07uJ_0BZm-wke2Z52TRGNU1yV4UfH4Ysk';
+          const convertedVapidKey = urlBase64ToUint8Array(publicVapidKey);
+          
+          subscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+          });
+        }
+
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/users/push-subscribe`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ subscription }),
+        });
+      } catch (err) {
+        console.error('Error subscribing to push:', err);
+      }
+    };
+
+    // Request Notification permission and Register Service Worker
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
-        .then((reg) => console.log('Service Worker registered scope:', reg.scope))
+        .then((reg) => {
+          console.log('Service Worker registered scope:', reg.scope);
+          if (Notification.permission === 'granted') {
+            subscribeToPush(reg);
+          } else if (Notification.permission === 'default') {
+            Notification.requestPermission().then((permission) => {
+              if (permission === 'granted') {
+                subscribeToPush(reg);
+              }
+            });
+          }
+        })
         .catch((err) => console.error('Service Worker registration failed:', err));
     }
 
@@ -124,3 +162,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
