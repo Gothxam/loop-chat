@@ -73,6 +73,51 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
     },
   });
 
+  const markPendingMessagesAsDelivered = async (targetUserId: string) => {
+    try {
+      const userChats = await Chat.find({ participants: targetUserId });
+      if (!userChats || userChats.length === 0) return;
+
+      const chatIds = userChats.map((c) => c._id);
+
+      const messages = await Message.find({
+        chatId: { $in: chatIds },
+        senderId: { $ne: targetUserId }
+      });
+
+      if (!messages || messages.length === 0) return;
+
+      await Promise.all(
+        messages.map(async (msg) => {
+          const existingReceipt = await MessageReceipt.findOne({
+            messageId: msg._id,
+            userId: targetUserId,
+          });
+
+          if (!existingReceipt) {
+            const newReceipt = await MessageReceipt.create({
+              messageId: msg._id,
+              userId: targetUserId,
+              status: 'delivered',
+            });
+
+            const populatedReceipt = await newReceipt.populate('userId', 'name photo');
+
+            const senderIdStr = typeof msg.senderId === 'object' ? (msg.senderId as any)._id?.toString() : msg.senderId.toString();
+            io.to(senderIdStr).emit('message:delivered', {
+              messageId: msg._id.toString(),
+              userId: targetUserId,
+              chatId: msg.chatId.toString(),
+              receipt: populatedReceipt,
+            });
+          }
+        })
+      );
+    } catch (err) {
+      console.error('Error marking pending messages as delivered:', err);
+    }
+  };
+
   // JWT Authentication Middleware for Socket.IO
   io.use(async (socket: Socket, next) => {
     try {
@@ -102,10 +147,15 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
     console.log(`User connected: ${userId} (Socket: ${socket.id})`);
 
     // Add socket to user's connection list
+    const wasOffline = !activeConnections.has(userId) || activeConnections.get(userId)!.size === 0;
     if (!activeConnections.has(userId)) {
       activeConnections.set(userId, new Set());
     }
     activeConnections.get(userId)!.add(socket.id);
+
+    if (wasOffline) {
+      markPendingMessagesAsDelivered(userId);
+    }
 
     // Join user's individual room for targeted notifications
     socket.join(userId);
@@ -175,12 +225,14 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
           participantIds.map(async (pId) => {
             if (pId !== userId) {
               const isOnline = activeConnections.has(pId);
-              // Create receipt
-              await MessageReceipt.create({
-                messageId: populatedMessage._id,
-                userId: pId,
-                status: isOnline ? 'delivered' : 'delivered', // For simplicity, we write delivered
-              });
+              if (isOnline) {
+                // Create receipt only if online (delivered)
+                await MessageReceipt.create({
+                  messageId: populatedMessage._id,
+                  userId: pId,
+                  status: 'delivered',
+                });
+              }
             }
           })
         );

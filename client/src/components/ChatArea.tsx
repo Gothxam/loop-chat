@@ -600,9 +600,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
                   {isMe && (
                     <span>
                       {msg.receipts?.some((r) => r.status === 'seen') ? (
-                        <CheckCheck className="w-3 h-3 text-cyan-400 font-bold" />
+                        <CheckCheck className="w-3.5 h-3.5 text-cyan-400 font-bold" />
+                      ) : msg.receipts?.some((r) => r.status === 'delivered') ? (
+                        <CheckCheck className="w-3.5 h-3.5 text-zinc-550" />
                       ) : (
-                        <Check className="w-3 h-3 text-zinc-650" />
+                        <Check className="w-3.5 h-3.5 text-zinc-550" />
                       )}
                     </span>
                   )}
