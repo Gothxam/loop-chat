@@ -199,9 +199,9 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
           io.to(pId).emit('message:receive', messageData);
         });
 
-        // Trigger background push notifications for offline/inactive users (app closed or background tab)
+        // Trigger push notifications for all recipients (regardless of app visibility state)
         participantIds.forEach((pId) => {
-          if (pId !== userId && !hasVisibleConnection(pId)) {
+          if (pId !== userId) {
             const senderName = (populatedMessage.senderId as any)?.name || 'New Message';
             const displayMsg = populatedMessage.fileUrl ? '📎 Sent an attachment' : (message || '');
             triggerPushNotifications(pId, senderName, displayMsg, chatId.toString());
