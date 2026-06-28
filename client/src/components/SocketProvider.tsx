@@ -8,7 +8,7 @@ import { queryClient } from '@/lib/queryClient';
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { token, isAuthenticated, user } = useAuthStore();
-  const { addOnlineUser, removeOnlineUser, setTyping } = useChatStore();
+  const { addOnlineUser, removeOnlineUser, setUserStatus, setTyping } = useChatStore();
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
@@ -50,12 +50,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     window.addEventListener('blur', onBlur);
 
     // Bind event listeners
-    socket.on('user:status', (data: { userId: string; status: 'online' | 'offline'; lastSeen?: string }) => {
-      if (data.status === 'online') {
-        addOnlineUser(data.userId);
-      } else {
-        removeOnlineUser(data.userId);
-      }
+    socket.on('user:status', (data: { userId: string; status: 'online' | 'away' | 'busy' | 'offline'; lastSeen?: string }) => {
+      setUserStatus(data.userId, data.status);
       // Invalidate chats list to refresh statuses in sidebar
       queryClient.invalidateQueries({ queryKey: ['chats'] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -246,7 +242,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       window.removeEventListener('message', handleSWMessage);
       disconnectSocket();
     };
-  }, [isAuthenticated, token, user, addOnlineUser, removeOnlineUser, setTyping]);
+  }, [isAuthenticated, token, user, addOnlineUser, removeOnlineUser, setUserStatus, setTyping]);
 
   // Toast Notification Helper
   const triggerNotification = (message: any) => {

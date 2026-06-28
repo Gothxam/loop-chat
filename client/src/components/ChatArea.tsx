@@ -44,7 +44,7 @@ interface ChatAreaProps {
 
 export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCreateGroup }) => {
   const { user, token } = useAuthStore();
-  const { activeChatId, setActiveChatId, typingUsers } = useChatStore();
+  const { activeChatId, setActiveChatId, userStatuses, typingUsers } = useChatStore();
   
   const [inputText, setInputText] = useState('');
   const [isTypingLocal, setIsTypingLocal] = useState(false);
@@ -418,7 +418,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
 
   // Active chat titles
   let chatTitle = 'Chat';
-  let isChatOnline = false;
+  let presenceStatus: 'online' | 'away' | 'busy' | 'offline' = 'offline';
   let statusText = '';
   
   if (activeChat) {
@@ -426,8 +426,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
       const otherParticipant = activeChat.participants.find((p: any) => p._id !== user?._id);
       chatTitle = otherParticipant?.name || 'User';
       // Real-time status check
-      isChatOnline = otherParticipant ? useChatStore.getState().onlineUsers.includes(otherParticipant._id) || otherParticipant.status === 'online' : false;
-      statusText = isChatOnline ? 'online' : 'offline';
+      presenceStatus = otherParticipant 
+        ? userStatuses[otherParticipant._id] || otherParticipant.status || 'offline'
+        : 'offline';
+      statusText = presenceStatus;
     } else {
       chatTitle = activeChat.name || 'Group Chat';
       statusText = `${activeChat.participants.length} members`;
@@ -476,9 +478,17 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
             <div className="flex items-center gap-1.5 mt-0.5">
               {activeChat?.type === 'private' ? (
                 <>
-                  <span className={`w-1.5 h-1.5 rounded-full ${isChatOnline ? 'bg-cyan-400 animate-pulse' : 'bg-zinc-650'}`} />
-                  <span className={`text-[8px] font-bold tracking-widest uppercase ${isChatOnline ? 'text-cyan-400' : 'text-zinc-500'}`}>
-                    {isChatOnline ? 'ONLINE' : 'OFFLINE'}
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    presenceStatus === 'online' ? 'bg-cyan-400 animate-pulse' :
+                    presenceStatus === 'away' ? 'bg-amber-500 animate-pulse' :
+                    presenceStatus === 'busy' ? 'bg-red-500 animate-pulse' : 'bg-zinc-650'
+                  }`} />
+                  <span className={`text-[8px] font-bold tracking-widest uppercase ${
+                    presenceStatus === 'online' ? 'text-cyan-400' :
+                    presenceStatus === 'away' ? 'text-amber-500' :
+                    presenceStatus === 'busy' ? 'text-red-500' : 'text-zinc-500'
+                  }`}>
+                    {presenceStatus}
                   </span>
                 </>
               ) : (
