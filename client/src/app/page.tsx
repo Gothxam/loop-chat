@@ -20,9 +20,18 @@ export default function DashboardPage() {
 
   if (!mounted || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 gap-4">
-        <div className="w-12 h-12 border-4 border-zinc-800 border-t-zinc-400 rounded-full animate-spin" />
-        <span className="text-xs text-zinc-500 font-semibold tracking-wider uppercase">Loading Chat...</span>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-950 gap-4 select-none">
+        {/* Animated Glow Logo Container */}
+        <div className="relative w-24 h-24 flex items-center justify-center">
+          {/* Outer rotating color halo matching brand colors (Purple to Cyan) */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 via-blue-600 to-cyan-500 rounded-full blur-xl opacity-30 animate-pulse" />
+          <div className="absolute inset-0 w-24 h-24 border-2 border-dashed border-cyan-500/20 rounded-full animate-spin [animation-duration:8s]" />
+          <div className="absolute inset-2 w-20 h-20 border border-dotted border-purple-500/10 rounded-full animate-spin [animation-duration:12s] [animation-direction:reverse]" />
+          
+          {/* Pulsating logo image */}
+          <img src="/icon.png" className="relative w-14 h-14 object-contain animate-bounce [animation-duration:3s]" alt="Loop" />
+        </div>
+        <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mt-4 animate-pulse">Initializing Loop...</span>
       </div>
     );
   }

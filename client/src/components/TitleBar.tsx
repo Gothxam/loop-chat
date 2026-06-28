@@ -15,14 +15,18 @@ export const TitleBar: React.FC = () => {
   if (!isElectron) return null;
 
   return (
-    <div className="w-full h-9 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between px-4 select-none [-webkit-app-region:drag] shrink-0 z-50">
-      <div className="flex items-center gap-2">
-        <img src="/icon.png" className="w-4.5 h-4.5 object-contain" alt="Loop" />
-        <span className="text-xs font-semibold text-zinc-300">Loop Chat</span>
+    <div className="w-full flex flex-col shrink-0 z-50 select-none">
+      {/* Sleek top-border brand gradient accent line */}
+      <div className="w-full h-[2px] bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500" />
+      <div className="w-full h-8.5 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between px-4 [-webkit-app-region:drag]">
+        <div className="flex items-center gap-2">
+          <img src="/icon.png" className="w-4 h-4 object-contain" alt="Loop" />
+          <span className="text-[11px] font-semibold text-zinc-300">Loop Chat</span>
+        </div>
+        
+        {/* Draggable space spacer, keeping the top right clear for native Windows controls overlay */}
+        <div className="w-36 h-full [-webkit-app-region:no-drag]" />
       </div>
-      
-      {/* Draggable space spacer, keeping the top right clear for native Windows controls overlay */}
-      <div className="w-36 h-full [-webkit-app-region:no-drag]" />
     </div>
   );
 };

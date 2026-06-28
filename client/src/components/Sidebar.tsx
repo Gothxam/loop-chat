@@ -70,7 +70,7 @@ export const Sidebar: React.FC = () => {
         <div className="flex items-center gap-3">
           <div
             onClick={() => setIsProfileOpen(true)}
-            className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-850 flex items-center justify-center overflow-hidden cursor-pointer hover:border-zinc-700 transition-colors shrink-0"
+            className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-850 flex items-center justify-center overflow-hidden cursor-pointer hover:border-purple-500/60 transition-colors shrink-0"
           >
             {user?.photo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -129,7 +129,7 @@ export const Sidebar: React.FC = () => {
             placeholder="Search conversations..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-850 text-xs text-zinc-100 pl-9 pr-3 py-2 rounded-xl outline-none focus:border-zinc-750 transition-all placeholder-zinc-550"
+            className="w-full bg-zinc-900 border border-zinc-850 text-xs text-zinc-100 pl-9 pr-3 py-2 rounded-xl outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all placeholder-zinc-550"
           />
         </div>
       </div>
@@ -217,7 +217,7 @@ export const Sidebar: React.FC = () => {
 
                 {/* Unread badge */}
                 {chat.unreadCount > 0 && !isActive && (
-                  <span className="flex items-center justify-center min-w-5 h-5 bg-zinc-100 text-zinc-950 font-bold text-[9px] rounded-full px-1.5 shadow-sm">
+                  <span className="flex items-center justify-center min-w-5 h-5 bg-gradient-to-tr from-purple-600 to-cyan-500 text-white font-extrabold text-[9px] rounded-full px-1.5 shadow-md">
                     {chat.unreadCount}
                   </span>
                 )}

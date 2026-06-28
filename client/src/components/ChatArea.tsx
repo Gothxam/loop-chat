@@ -609,14 +609,14 @@ export const ChatArea: React.FC = () => {
                   handleSendMessage(e);
                 }
               }}
-              className="w-full bg-zinc-950 border border-zinc-850 text-xs text-zinc-100 pl-4 pr-10 py-3 rounded-2xl outline-none focus:border-zinc-700 transition-all placeholder-zinc-550 resize-none max-h-24 scrollbar-none"
+              className="w-full bg-zinc-950 border border-zinc-850 text-xs text-zinc-100 pl-4 pr-10 py-3 rounded-2xl outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all placeholder-zinc-550 resize-none max-h-24 scrollbar-none"
             />
           </div>
 
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="p-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
+            className="p-3 bg-gradient-to-tr from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:scale-[1.02] active:scale-[0.98]"
           >
             <Send className="w-4.5 h-4.5" />
           </button>
