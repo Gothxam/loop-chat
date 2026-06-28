@@ -57,9 +57,39 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socket.on('message:receive', (message: any) => {
-      // Invalidate queries to trigger React Query refetch
+      // Directly append the new message to the query cache (optimistic sync)
+      queryClient.setQueryData(['messages', message.chatId], (oldData: any) => {
+        if (!oldData) return { messages: [message] };
+        const messagesList = oldData.messages || [];
+        
+        // Check if message already exists by ID
+        const exists = messagesList.some((m: any) => m._id === message._id);
+        if (exists) return oldData;
+
+        // Check if there is an optimistic temp placeholder for this message
+        const tempIndex = messagesList.findIndex(
+          (m: any) =>
+            m._id.startsWith('temp-') &&
+            (m.message === message.message || (m.fileUrl && m.fileUrl === message.fileUrl))
+        );
+
+        const updated = [...messagesList];
+        if (tempIndex !== -1) {
+          // Swap optimistic placeholder with real server message
+          updated[tempIndex] = message;
+        } else {
+          // Append new message
+          updated.push(message);
+        }
+
+        return {
+          ...oldData,
+          messages: updated,
+        };
+      });
+
+      // Invalidate the chats list query to update the unread counters and last message updates in sidebar
       queryClient.invalidateQueries({ queryKey: ['chats'] });
-      queryClient.invalidateQueries({ queryKey: ['messages', message.chatId] });
 
       // Trigger web notifications if browser is minimized / not focused
       // and the sender is not the current user

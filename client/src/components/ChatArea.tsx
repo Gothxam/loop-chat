@@ -167,14 +167,42 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
     const socket = getSocket();
     if (!socket || !activeChatId) return;
 
+    const messageText = inputText.trim();
+
     // Send typing stop immediately
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     setIsTypingLocal(false);
     socket.emit('typing:stop', { chatId: activeChatId });
 
+    // Create optimistic message
+    const tempId = `temp-${Date.now()}`;
+    const tempMessage: Message = {
+      _id: tempId,
+      chatId: activeChatId,
+      senderId: {
+        _id: user?._id || '',
+        name: user?.name || 'You',
+        photo: user?.photo || '',
+      },
+      message: messageText,
+      reactions: [],
+      receipts: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Optimistically update React Query cache for instant UI rendering
+    queryClient.setQueryData(['messages', activeChatId], (oldData: any) => {
+      if (!oldData) return { messages: [tempMessage] };
+      return {
+        ...oldData,
+        messages: [...(oldData.messages || []), tempMessage],
+      };
+    });
+
     socket.emit('message:send', {
       chatId: activeChatId,
-      message: inputText.trim(),
+      message: messageText,
       replyTo: replyingTo?._id,
     });
 
@@ -209,6 +237,34 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
         // Send file details via socket
         const socket = getSocket();
         if (socket && activeChatId) {
+          // Create optimistic file message
+          const tempId = `temp-${Date.now()}`;
+          const tempFileMessage: Message = {
+            _id: tempId,
+            chatId: activeChatId,
+            senderId: {
+              _id: user?._id || '',
+              name: user?.name || 'You',
+              photo: user?.photo || '',
+            },
+            message: data.originalName,
+            fileUrl: data.fileUrl,
+            fileType: data.fileType,
+            reactions: [],
+            receipts: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          // Optimistically update React Query cache
+          queryClient.setQueryData(['messages', activeChatId], (oldData: any) => {
+            if (!oldData) return { messages: [tempFileMessage] };
+            return {
+              ...oldData,
+              messages: [...(oldData.messages || []), tempFileMessage],
+            };
+          });
+
           socket.emit('message:send', {
             chatId: activeChatId,
             fileUrl: data.fileUrl,

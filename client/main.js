@@ -43,6 +43,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Set Application User Model ID for Windows Notifications
+  if (process.platform === 'win32') {
+    app.setAppUserModelId('com.gothxam.loopchat');
+  }
   createWindow();
 
   if (!isDev) {
