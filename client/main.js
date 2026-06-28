@@ -14,6 +14,12 @@ function createWindow() {
     title: 'Loop Chat',
     backgroundColor: '#09090b',
     autoHideMenuBar: true, // Hides standard file/edit menu bar
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#09090b', // Match our Zinc-950 background
+      symbolColor: '#f4f4f5', // Zinc-100 close/min/max symbols
+      height: 36
+    },
     icon: path.join(__dirname, 'public/favicon.ico'), // Fallback icon path
     webPreferences: {
       nodeIntegration: false,

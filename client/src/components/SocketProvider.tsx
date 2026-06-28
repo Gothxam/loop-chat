@@ -19,6 +19,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Connect Socket.IO client
     const socket = connectSocket(token);
 
+    // Sync visibility state with the server (active/inactive focus tracking)
+    const handleVisibilityChange = () => {
+      if (socket && socket.connected) {
+        socket.emit('user:active_state', { active: document.visibilityState === 'visible' });
+      }
+    };
+
+    socket.on('connect', () => {
+      socket.emit('user:active_state', { active: document.visibilityState === 'visible' });
+    });
+
+    if (socket.connected) {
+      socket.emit('user:active_state', { active: document.visibilityState === 'visible' });
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     // Bind event listeners
     socket.on('user:status', (data: { userId: string; status: 'online' | 'offline'; lastSeen?: string }) => {
       if (data.status === 'online') {
@@ -132,6 +149,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     window.addEventListener('message', handleSWMessage);
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('message', handleSWMessage);
       disconnectSocket();
     };

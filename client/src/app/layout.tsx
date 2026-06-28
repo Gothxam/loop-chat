@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { TitleBar } from "@/components/TitleBar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,7 +25,10 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased dark`}
     >
       <body className="h-full bg-slate-950 text-slate-100 flex flex-col font-sans">
-        <Providers>{children}</Providers>
+        <Providers>
+          <TitleBar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -51,6 +51,18 @@ interface DecodedToken {
 
 // Map to track active user socket connections: userId -> Set of socketId
 const activeConnections = new Map<string, Set<string>>();
+const inactiveSockets = new Set<string>();
+
+const hasVisibleConnection = (userId: string): boolean => {
+  const sockets = activeConnections.get(userId);
+  if (!sockets || sockets.size === 0) return false;
+  for (const socketId of sockets) {
+    if (!inactiveSockets.has(socketId)) {
+      return true;
+    }
+  }
+  return false;
+};
 
 export const initializeSocket = (httpServer: HttpServer, clientUrl: string | string[]) => {
   const io = new Server(httpServer, {
@@ -97,6 +109,16 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
 
     // Join user's individual room for targeted notifications
     socket.join(userId);
+
+    // Track active/inactive visibility state from user client
+    socket.on('user:active_state', (data: { active: boolean }) => {
+      console.log(`Socket visibility changed: ${socket.id} (User: ${userId}) -> ${data.active ? 'Visible' : 'Hidden'}`);
+      if (data.active) {
+        inactiveSockets.delete(socket.id);
+      } else {
+        inactiveSockets.add(socket.id);
+      }
+    });
 
     // Set user status to online and broadcast
     try {
@@ -177,9 +199,9 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
           io.to(pId).emit('message:receive', messageData);
         });
 
-        // Trigger background push notifications for offline users (app closed)
+        // Trigger background push notifications for offline/inactive users (app closed or background tab)
         participantIds.forEach((pId) => {
-          if (pId !== userId && !activeConnections.has(pId)) {
+          if (pId !== userId && !hasVisibleConnection(pId)) {
             const senderName = (populatedMessage.senderId as any)?.name || 'New Message';
             const displayMsg = populatedMessage.fileUrl ? '📎 Sent an attachment' : (message || '');
             triggerPushNotifications(pId, senderName, displayMsg, chatId.toString());
@@ -365,6 +387,7 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
     // Handle Disconnect
     socket.on('disconnect', async () => {
       console.log(`Socket disconnected: ${socket.id}`);
+      inactiveSockets.delete(socket.id);
       const userSockets = activeConnections.get(userId);
       if (userSockets) {
         userSockets.delete(socket.id);
