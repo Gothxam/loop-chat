@@ -18,6 +18,15 @@ import {
   Check,
   CheckCheck,
   ChevronLeft,
+  Users,
+  Phone,
+  Video,
+  Info,
+  Globe,
+  Network,
+  AtSign,
+  Lock,
+  MessageSquarePlus,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore, Message } from '@/store/useChatStore';
@@ -28,7 +37,12 @@ import EmojiPicker, { Theme } from 'emoji-picker-react';
 
 const emojis = ['👍', '❤️', '🔥', '😂', '😮', '😢', '🙏'];
 
-export const ChatArea: React.FC = () => {
+interface ChatAreaProps {
+  onOpenCreateChat: () => void;
+  onOpenCreateGroup?: () => void;
+}
+
+export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCreateGroup }) => {
   const { user, token } = useAuthStore();
   const { activeChatId, setActiveChatId, typingUsers } = useChatStore();
   
@@ -243,16 +257,84 @@ export const ChatArea: React.FC = () => {
 
   if (!activeChatId) {
     return (
-      <div className="hidden md:flex flex-1 h-full flex-col items-center justify-center bg-zinc-950 text-zinc-500">
-        <div className="relative inline-flex items-center justify-center w-20 h-20 mb-6 select-none animate-pulse">
-          {/* Subtle logo background glow matching brand colors */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/10 via-blue-600/5 to-cyan-500/10 blur-xl rounded-full" />
-          <img src="/icon.png" className="relative w-16 h-16 object-contain" alt="Loop Logo" />
+      <div className="hidden md:flex flex-1 h-full flex-col items-center justify-center bg-zinc-950 px-8 text-center select-none relative overflow-hidden">
+        {/* Deep background ambient glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-purple-600/5 via-blue-600/3 to-cyan-500/5 blur-3xl rounded-full pointer-events-none" />
+
+        {/* Brand Infinity Logo */}
+        <div className="relative w-28 h-28 mb-8 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/10 via-blue-600/5 to-cyan-500/10 blur-2xl rounded-full" />
+          <img src="/icon.png" className="relative w-24 h-24 object-contain animate-pulse" alt="Loop Logo" />
         </div>
-        <h3 className="text-lg font-bold text-zinc-300 mb-1">Your Loop Messaging Hub</h3>
-        <p className="text-sm text-zinc-550 max-w-sm text-center">
-          Select a conversation from the sidebar or start a new direct/group chat to coordinate in real-time.
+
+        {/* Welcome Titles */}
+        <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2">Welcome to Loop Chat</h1>
+        <p className="text-xs text-zinc-400 max-w-lg mb-8 leading-relaxed">
+          Send and receive messages, media files, and voice notes securely. Keep your personal and group conversations flowing in real-time.
         </p>
+
+        {/* Quick Action Buttons */}
+        <div className="flex items-center gap-4 mb-12 relative z-10">
+          <button
+            onClick={onOpenCreateChat}
+            className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-purple-600/15 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <MessageSquarePlus className="w-4 h-4" />
+            Start New Chat
+          </button>
+          <button
+            onClick={onOpenCreateGroup}
+            className="flex items-center gap-2 px-5 py-2.5 border border-zinc-800 hover:bg-zinc-900/40 text-zinc-300 font-semibold text-xs rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <Users className="w-4 h-4" />
+            Create New Group
+          </button>
+        </div>
+
+        {/* Feature Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl w-full relative z-10">
+          {/* Card 1 */}
+          <div className="panel-card p-5 rounded-2xl text-left hover:border-cyan-500/20 transition-all group">
+            <div className="w-8 h-8 rounded-lg bg-cyan-950/20 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-105 transition-transform">
+              <MessageSquarePlus className="w-4 h-4" />
+            </div>
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="text-xs font-bold text-zinc-200">Direct Messages</h3>
+              <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">Private</span>
+            </div>
+            <p className="text-[10px] text-zinc-450 leading-relaxed">
+              Chat privately with friends and family in real-time with instant typing sync.
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="panel-card p-5 rounded-2xl text-left hover:border-purple-500/20 transition-all group">
+            <div className="w-8 h-8 rounded-lg bg-purple-950/20 border border-purple-500/20 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-105 transition-transform">
+              <Users className="w-4 h-4" />
+            </div>
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="text-xs font-bold text-zinc-200">Group Chats</h3>
+              <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest">Coordinated</span>
+            </div>
+            <p className="text-[10px] text-zinc-450 leading-relaxed">
+              Create groups to coordinate plans, share updates, and stay in touch with everyone.
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="panel-card p-5 rounded-2xl text-left hover:border-blue-500/20 transition-all group">
+            <div className="w-8 h-8 rounded-lg bg-blue-950/20 border border-blue-500/20 flex items-center justify-center text-blue-400 mb-4 group-hover:scale-105 transition-transform">
+              <Lock className="w-4 h-4" />
+            </div>
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="text-xs font-bold text-zinc-200">Secure Sharing</h3>
+              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Encrypted</span>
+            </div>
+            <p className="text-[10px] text-zinc-450 leading-relaxed">
+              Send photos, videos, files, and documents safely with end-to-end security.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -284,24 +366,62 @@ export const ChatArea: React.FC = () => {
   return (
     <div className={`flex-1 h-full flex flex-col bg-zinc-950 ${activeChatId ? 'flex' : 'hidden md:flex'}`}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-zinc-900 flex items-center justify-between bg-zinc-950/20">
+      <div className="px-6 py-3 border-b border-zinc-900 flex items-center justify-between bg-zinc-950/20">
         <div className="flex items-center gap-3">
           {/* Back Button for mobile view */}
           <button
             onClick={() => setActiveChatId(null)}
-            className="md:hidden p-1.5 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-zinc-100 transition-all mr-1 shrink-0"
+            className="md:hidden p-1.5 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-zinc-100 transition-all mr-1 shrink-0 cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              {chatTitle}
-              {activeChat?.type === 'private' && (
-                <span className={`w-2 h-2 rounded-full ${isChatOnline ? 'bg-emerald-500' : 'bg-zinc-650'}`} />
-              )}
-            </h3>
-            <p className="text-[10px] text-zinc-400 capitalize">{statusText}</p>
+
+          {/* User Profile Avatar */}
+          <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-md">
+            {activeChat?.type === 'private' ? (
+              (() => {
+                const otherParticipant = activeChat.participants.find((p: any) => p._id !== user?._id);
+                return otherParticipant?.photo ? (
+                  <img src={otherParticipant.photo} alt={chatTitle} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-zinc-300 font-extrabold text-xs">{chatTitle.charAt(0)}</span>
+                );
+              })()
+            ) : (
+              <Users className="w-4.5 h-4.5 text-zinc-400" />
+            )}
           </div>
+
+          <div>
+            <h3 className="text-xs font-bold text-white tracking-tight">
+              {chatTitle}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {activeChat?.type === 'private' ? (
+                <>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isChatOnline ? 'bg-cyan-400 animate-pulse' : 'bg-zinc-650'}`} />
+                  <span className={`text-[8px] font-bold tracking-widest uppercase ${isChatOnline ? 'text-cyan-400' : 'text-zinc-500'}`}>
+                    {isChatOnline ? 'ONLINE' : 'OFFLINE'}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[9px] text-zinc-400 font-medium">{statusText}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Header Buttons */}
+        <div className="flex items-center gap-1.5 text-zinc-450">
+          <button className="p-2 hover:bg-zinc-900 rounded-lg hover:text-zinc-100 transition-all cursor-pointer">
+            <Phone className="w-4.5 h-4.5" />
+          </button>
+          <button className="p-2 hover:bg-zinc-900 rounded-lg hover:text-zinc-100 transition-all cursor-pointer">
+            <Video className="w-4.5 h-4.5" />
+          </button>
+          <button className="p-2 hover:bg-zinc-900 rounded-lg hover:text-zinc-100 transition-all cursor-pointer">
+            <Info className="w-4.5 h-4.5" />
+          </button>
         </div>
       </div>
 
@@ -326,13 +446,12 @@ export const ChatArea: React.FC = () => {
                   setHoveredMessageId(null);
                   setActiveMenuId(null);
                 }}
-                className={`flex gap-3 max-w-[70%] group relative ${isMe ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
+                className={`flex items-end gap-2.5 max-w-[85%] group relative ${isMe ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
               >
                 {/* Avatar */}
                 {!isMe && (
-                  <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-850 flex items-center justify-center overflow-hidden shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 mb-1 shadow-sm">
                     {sender.photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={sender.photo} alt={sender.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-xs font-semibold text-zinc-300">{sender.name.charAt(0)}</span>
@@ -341,16 +460,16 @@ export const ChatArea: React.FC = () => {
                 )}
 
                 {/* Message Box */}
-                <div className="space-y-1">
+                <div className="space-y-1 max-w-[70%]">
                   {/* Sender Name */}
                   {!isMe && activeChat?.type === 'group' && (
-                    <span className="text-[9px] font-bold text-zinc-300 block px-1">{sender.name}</span>
+                    <span className="text-[9px] font-bold text-zinc-400 block px-1">{sender.name}</span>
                   )}
 
                   {/* Reply Reference */}
                   {msg.replyTo && (
                     <div className={`p-2 rounded-xl text-xs border bg-zinc-950/80 mb-1 border-zinc-850/60 ${isMe ? 'text-right' : 'text-left'}`}>
-                      <p className="font-bold text-[9px] text-zinc-400">Replying to {msg.replyTo.senderId?.name || 'User'}</p>
+                      <p className="font-bold text-[9px] text-zinc-450">Replying to {msg.replyTo.senderId?.name || 'User'}</p>
                       <p className="text-zinc-400 truncate text-[10px]">{msg.replyTo.message}</p>
                     </div>
                   )}
@@ -359,15 +478,14 @@ export const ChatArea: React.FC = () => {
                   <div
                     className={`p-3 rounded-2xl text-xs leading-relaxed transition-all shadow-sm relative ${
                       isMe
-                        ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 border border-transparent text-white rounded-tr-none font-semibold'
-                        : 'bg-[#18181b] border border-zinc-800 text-zinc-100 rounded-tl-none'
+                        ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-teal-950 rounded-tr-none font-semibold shadow-md shadow-cyan-500/5'
+                        : 'bg-[#161619]/60 border border-zinc-800/80 text-zinc-100 rounded-tl-none backdrop-blur-sm'
                     }`}
                   >
                     {/* Inline File attachment */}
                     {msg.fileUrl && (
                       <div className="mb-2">
                         {msg.fileType === 'image' && (
-                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={msg.fileUrl}
                             alt="Attachment"
@@ -391,7 +509,7 @@ export const ChatArea: React.FC = () => {
                             <FileText className="w-5 h-5 text-zinc-400" />
                             <div className="min-w-0">
                               <p className="truncate text-[10px] max-w-[150px] text-zinc-100">{msg.message}</p>
-                              <span className="text-[8px] text-zinc-500">Download Document</span>
+                              <span className="text-[8px] text-zinc-550">Download Document</span>
                             </div>
                           </a>
                         )}
@@ -402,22 +520,6 @@ export const ChatArea: React.FC = () => {
                     {(!msg.fileUrl || msg.fileType !== 'document') && (
                       <p className="whitespace-pre-line">{msg.message}</p>
                     )}
-
-                    {/* Footer receipt indicators & timestamp */}
-                    <div className={`flex items-center justify-end gap-1 mt-1.5 text-[8px] ${isMe ? 'text-zinc-200/85' : 'text-zinc-450'}`}>
-                      <span>
-                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                      {isMe && (
-                        <span>
-                          {msg.receipts?.some((r) => r.status === 'seen') ? (
-                            <CheckCheck className="w-3 h-3 text-cyan-200 font-bold" />
-                          ) : (
-                            <Check className="w-3 h-3 text-white/50" />
-                          )}
-                        </span>
-                      )}
-                    </div>
                   </div>
 
                   {/* Reaction Badges */}
@@ -433,7 +535,23 @@ export const ChatArea: React.FC = () => {
                       ))}
                     </div>
                   )}
-                  {/* Message Action Bar (Hover Menu) */}
+                </div>
+
+                {/* External Timestamp */}
+                <div className="flex items-center gap-1 text-[8px] text-zinc-550 select-none mb-1 shrink-0 px-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  {isMe && (
+                    <span>
+                      {msg.receipts?.some((r) => r.status === 'seen') ? (
+                        <CheckCheck className="w-3 h-3 text-cyan-400 font-bold" />
+                      ) : (
+                        <Check className="w-3 h-3 text-zinc-650" />
+                      )}
+                    </span>
+                  )}
+                </div>
+
+                {/* Message Action Bar (Hover Menu) */}
                 {hoveredMessageId === msg._id && msg.message !== 'This message was deleted' && (
                   <div
                     className={`absolute top-1/2 -translate-y-1/2 z-20 bg-zinc-900 border border-zinc-850 flex items-center p-1 rounded-xl shadow-lg gap-1 ${
@@ -485,7 +603,6 @@ export const ChatArea: React.FC = () => {
                     )}
                   </div>
                 )}
-                </div>
               </div>
             );
           })
@@ -497,13 +614,11 @@ export const ChatArea: React.FC = () => {
 
       {/* Typing Indicator Display */}
       {typers.length > 0 && (
-        <div className="px-6 py-1.5 text-[10px] text-zinc-400 italic flex items-center gap-1">
-          <span>{typingDisplay} is typing</span>
-          <div className="flex gap-0.5 items-center">
-            <span className="w-1 h-1 bg-zinc-400 rounded-full typing-dot" />
-            <span className="w-1 h-1 bg-zinc-400 rounded-full typing-dot" />
-            <span className="w-1 h-1 bg-zinc-400 rounded-full typing-dot" />
-          </div>
+        <div className="absolute bottom-24 right-6 z-20 flex items-center gap-2 bg-[#121215]/90 border border-zinc-800/80 px-3 py-1.5 rounded-full shadow-lg animate-slide-up backdrop-blur-md">
+          <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping shrink-0" />
+          <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest leading-none">
+            {typingDisplay.toUpperCase()} IS TYPING...
+          </span>
         </div>
       )}
 
@@ -552,19 +667,22 @@ export const ChatArea: React.FC = () => {
       )}
 
       {/* Bottom Panel (Chat Input Panel) */}
-      <div className="p-4 border-t border-zinc-900 bg-zinc-950/10">
-        <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-          <div className="flex gap-1.5 text-zinc-400 relative">
+      <div className="p-4 border-t border-zinc-900 bg-zinc-950/25 relative z-10">
+        <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex flex-col gap-2">
+          {/* Pill Input Container */}
+          <div className="w-full bg-[#111114] border border-zinc-850 rounded-2xl p-2 flex items-center gap-3 focus-within:border-cyan-500/50 focus-within:ring-1 focus-within:ring-cyan-500/20 transition-all">
+            {/* Attachment Button */}
             <button
               type="button"
               onClick={handleFileClick}
               disabled={uploading}
-              className="p-2 hover:bg-zinc-800/80 hover:text-zinc-100 rounded-xl transition-all"
+              className="p-2 hover:bg-zinc-900 rounded-xl text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer shrink-0"
+              title="Attach File"
             >
               {uploading ? (
-                <div className="w-4 h-4 border border-zinc-800 border-t-zinc-400 rounded-full animate-spin" />
+                <div className="w-4.5 h-4.5 border border-zinc-800 border-t-zinc-400 rounded-full animate-spin" />
               ) : (
-                <Paperclip className="w-4 h-4" />
+                <Paperclip className="w-4.5 h-4.5" />
               )}
             </button>
             <input
@@ -573,53 +691,76 @@ export const ChatArea: React.FC = () => {
               onChange={handleFileChange}
               className="hidden"
             />
-            
+
+            {/* Emoji Button */}
+            <div className="relative shrink-0 flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                className={`p-2 hover:bg-zinc-900 rounded-xl text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer ${
+                  showEmojiPicker ? 'text-zinc-100 bg-zinc-900' : ''
+                }`}
+                title="Emojis"
+              >
+                <Smile className="w-4.5 h-4.5" />
+              </button>
+              {showEmojiPicker && (
+                <div className="absolute bottom-12 left-0 z-50">
+                  <EmojiPicker
+                    theme={Theme.DARK}
+                    onEmojiClick={(emojiData) => insertEmoji(emojiData.emoji)}
+                    width={300}
+                    height={360}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Textarea Input */}
+            <div className="flex-1">
+              <textarea
+                ref={textareaRef}
+                placeholder="Type a message..."
+                rows={1}
+                value={inputText}
+                onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage(e);
+                  }
+                }}
+                className="w-full bg-transparent text-xs text-zinc-100 outline-none placeholder-zinc-550 resize-none max-h-20 py-1.5 scrollbar-none"
+              />
+            </div>
+
+            {/* Send Button */}
+            <button
+              type="submit"
+              disabled={!inputText.trim()}
+              className="w-9 h-9 flex items-center justify-center bg-gradient-to-tr from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-md shadow-purple-600/10 shrink-0"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Quick Info Keyboard Shortcuts */}
+          <div className="flex items-center gap-4 px-2 text-[9px] text-zinc-550 select-none">
             <button
               type="button"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className={`p-2 hover:bg-zinc-800/80 hover:text-zinc-100 rounded-xl transition-all ${
-                showEmojiPicker ? 'text-zinc-100 bg-zinc-800' : ''
-              }`}
+              onClick={handleFileClick}
+              className="hover:text-zinc-400 flex items-center gap-1 transition-colors cursor-pointer"
             >
-              <Smile className="w-4 h-4" />
+              <span>📎 ATTACH FILE (⌘+U)</span>
             </button>
-
-            {showEmojiPicker && (
-              <div className="absolute bottom-full left-0 mb-3 z-50 shadow-2xl rounded-2xl overflow-hidden border border-zinc-850">
-                <EmojiPicker
-                  theme={Theme.DARK}
-                  onEmojiClick={(emojiData) => insertEmoji(emojiData.emoji)}
-                  width={320}
-                  height={380}
-                />
-              </div>
-            )}
+            <span className="text-zinc-700">•</span>
+            <button
+              type="button"
+              className="hover:text-zinc-400 flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span>🎙️ VOICE MESSAGE (⌘+H)</span>
+            </button>
           </div>
-
-          <div className="flex-1 relative">
-            <textarea
-              ref={textareaRef}
-              placeholder="Write a message... (Shift+Enter for newline)"
-              rows={1}
-              value={inputText}
-              onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage(e);
-                }
-              }}
-              className="w-full bg-zinc-950 border border-zinc-850 text-xs text-zinc-100 pl-4 pr-10 py-3 rounded-2xl outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all placeholder-zinc-550 resize-none max-h-24 scrollbar-none"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={!inputText.trim()}
-            className="p-3 bg-gradient-to-tr from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <Send className="w-4.5 h-4.5" />
-          </button>
         </form>
       </div>
     </div>
