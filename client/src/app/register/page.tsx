@@ -86,8 +86,8 @@ export default function RegisterPage() {
       {/* Container */}
       <div className="w-full max-w-md animate-slide-up">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-100 mb-4 select-none">
-            <span className="text-zinc-950 font-black text-xl tracking-tight">L</span>
+          <div className="inline-flex items-center justify-center w-14 h-14 mb-4 select-none">
+            <img src="/icon.png" className="w-full h-full object-contain" alt="Loop Logo" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Create Account</h1>
           <p className="mt-1.5 text-xs text-zinc-400">Join Loop Chat today</p>
@@ -199,10 +199,10 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-bold py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.005] active:scale-[0.995]"
+              className="w-full mt-3 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 hover:from-purple-500 hover:via-blue-500 hover:to-cyan-400 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 hover:scale-[1.005] active:scale-[0.995]"
             >
               {loading ? (
-                <div className="w-4 h-4 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
                 'Create Account'
               )}

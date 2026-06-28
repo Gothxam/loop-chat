@@ -244,8 +244,10 @@ export const ChatArea: React.FC = () => {
   if (!activeChatId) {
     return (
       <div className="hidden md:flex flex-1 h-full flex-col items-center justify-center bg-zinc-950 text-zinc-500">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-zinc-900 border border-zinc-800 mb-6 shadow-xl">
-          <span className="text-zinc-100 font-extrabold text-4xl tracking-wider select-none">L</span>
+        <div className="relative inline-flex items-center justify-center w-20 h-20 mb-6 select-none animate-pulse">
+          {/* Subtle logo background glow matching brand colors */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/10 via-blue-600/5 to-cyan-500/10 blur-xl rounded-full" />
+          <img src="/icon.png" className="relative w-16 h-16 object-contain" alt="Loop Logo" />
         </div>
         <h3 className="text-lg font-bold text-zinc-300 mb-1">Your Loop Messaging Hub</h3>
         <p className="text-sm text-zinc-550 max-w-sm text-center">

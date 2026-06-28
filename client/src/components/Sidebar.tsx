@@ -173,7 +173,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => handleSelectChat(chat._id)}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl text-left border transition-all ${
                   isActive
-                    ? 'bg-zinc-900 border-zinc-800/80 text-white'
+                    ? 'bg-zinc-900 border-zinc-800/80 border-l-2 border-l-purple-500 text-white pl-[10px]'
                     : 'bg-transparent border-transparent hover:bg-zinc-900/40 text-zinc-300'
                 }`}
               >

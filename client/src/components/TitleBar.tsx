@@ -17,9 +17,7 @@ export const TitleBar: React.FC = () => {
   return (
     <div className="w-full h-9 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between px-4 select-none [-webkit-app-region:drag] shrink-0 z-50">
       <div className="flex items-center gap-2">
-        <div className="w-4 h-4 rounded bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-          <span className="text-[9px] font-extrabold text-white leading-none">L</span>
-        </div>
+        <img src="/icon.png" className="w-4.5 h-4.5 object-contain" alt="Loop" />
         <span className="text-xs font-semibold text-zinc-300">Loop Chat</span>
       </div>
       
