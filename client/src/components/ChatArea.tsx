@@ -366,7 +366,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
   return (
     <div className={`flex-1 h-full flex flex-col bg-zinc-950 ${activeChatId ? 'flex' : 'hidden md:flex'}`}>
       {/* Header */}
-      <div className="px-6 py-3 border-b border-zinc-900 flex items-center justify-between bg-zinc-950/20">
+      <div className="sticky top-0 z-30 px-6 py-3 border-b border-zinc-900 flex items-center justify-between bg-zinc-950/95 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-3">
           {/* Back Button for mobile view */}
           <button
