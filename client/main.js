@@ -1,12 +1,15 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 const PROD_URL = 'https://loop-hole.vercel.app';
 
-function createWindow() {
-  const mainWindow = new BrowserWindow({
+let mainWindow = null;
+let tray = null;
+
+function createWindow(showOnCreate = true) {
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 400,
@@ -21,6 +24,7 @@ function createWindow() {
       height: 36
     },
     icon: path.join(__dirname, 'public/favicon.ico'), // Fallback icon path
+    show: showOnCreate,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -36,9 +40,44 @@ function createWindow() {
     mainWindow.loadURL(PROD_URL);
   }
 
+  // Intercept window close event to hide it instead of quitting
+  mainWindow.on('close', (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+    return false;
+  });
+
   // Handle window titles dynamically
   mainWindow.on('page-title-updated', (e) => {
     e.preventDefault();
+  });
+}
+
+function createTray() {
+  if (tray) return;
+  const iconPath = path.join(__dirname, 'public', 'icon.png');
+  tray = new Tray(iconPath);
+  
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Show App', click: () => { if (mainWindow) { mainWindow.show(); mainWindow.focus(); } } },
+    { type: 'separator' },
+    { label: 'Exit', click: () => {
+        app.isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+
+  tray.setToolTip('Loop Chat');
+  tray.setContextMenu(contextMenu);
+  
+  tray.on('click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
 }
 
@@ -47,7 +86,31 @@ app.whenReady().then(() => {
   if (process.platform === 'win32') {
     app.setAppUserModelId('com.gothxam.loopchat');
   }
-  createWindow();
+
+  // IPC main handlers
+  ipcMain.on('window:show', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+
+  ipcMain.on('app:toggle-autostart', (event, enable) => {
+    app.setLoginItemSettings({
+      openAtLogin: enable,
+      path: app.getPath('exe'),
+      args: ['--hidden']
+    });
+  });
+
+  ipcMain.handle('app:get-autostart', () => {
+    const settings = app.getLoginItemSettings();
+    return settings.openAtLogin;
+  });
+
+  const startHidden = process.argv.includes('--hidden');
+  createWindow(!startHidden);
+  createTray();
 
   if (!isDev) {
     autoUpdater.checkForUpdatesAndNotify();
@@ -70,8 +133,17 @@ app.whenReady().then(() => {
     console.log(`Auto-Updater: Downloaded ${Math.round(progressObj.percent)}%`);
   });
   autoUpdater.on('update-downloaded', (info) => {
-    console.log('Auto-Updater: Update downloaded. Restarting to apply...');
-    autoUpdater.quitAndInstall();
+    console.log('Auto-Updater: Update downloaded. Prompting user to apply...');
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Ready',
+      message: 'A new version of Loop Chat has been downloaded. Restart the app to apply the update?',
+      buttons: ['Restart Now', 'Later']
+    }).then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
   });
 
   app.on('activate', function () {
