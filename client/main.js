@@ -49,6 +49,27 @@ app.whenReady().then(() => {
     autoUpdater.checkForUpdatesAndNotify();
   }
 
+  // Auto-Updater Logging and Handlers
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Auto-Updater: Checking for update...');
+  });
+  autoUpdater.on('update-available', (info) => {
+    console.log('Auto-Updater: Update available! Version:', info.version);
+  });
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Auto-Updater: Update not available.');
+  });
+  autoUpdater.on('error', (err) => {
+    console.error('Auto-Updater: Error in auto-updater:', err);
+  });
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`Auto-Updater: Downloaded ${Math.round(progressObj.percent)}%`);
+  });
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Auto-Updater: Update downloaded. Restarting to apply...');
+    autoUpdater.quitAndInstall();
+  });
+
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
