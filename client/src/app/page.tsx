@@ -64,7 +64,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Messages list sidebar */}
-        <Sidebar onOpenCreateChat={() => setIsChatOpen(true)} />
+        <Sidebar
+          onOpenCreateChat={() => setIsChatOpen(true)}
+          onOpenProfile={() => setIsProfileOpen(true)}
+        />
 
         {/* Chat Feed Area */}
         <ChatArea

@@ -2,15 +2,16 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Users, SquarePen, Search } from 'lucide-react';
+import { Users, SquarePen, Search, MessageSquare, Phone, Bell, Settings, Plus } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useChatStore } from '@/store/useChatStore';
 
 interface SidebarProps {
   onOpenCreateChat: () => void;
+  onOpenProfile: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateChat }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateChat, onOpenProfile }) => {
   const { user, token } = useAuthStore();
   const { activeChatId, setActiveChatId, onlineUsers } = useChatStore();
   const [filter, setFilter] = useState('');
@@ -182,6 +183,44 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenCreateChat }) => {
             {filter ? 'No conversations found' : 'No active chats. Start one below!'}
           </div>
         )}
+      </div>
+
+      {/* Mobile Bottom Navigation Bar (WhatsApp style) */}
+      <div className="md:hidden h-14 border-t border-zinc-900 bg-zinc-950 flex items-center justify-around px-2 shrink-0 select-none">
+        {/* Chats Tab (Selected) */}
+        <button className="flex flex-col items-center gap-0.5 text-cyan-400 cursor-pointer">
+          <MessageSquare className="w-4.5 h-4.5" />
+          <span className="text-[8px] font-bold tracking-wider">Chats</span>
+        </button>
+        
+        {/* Calls Tab */}
+        <button className="flex flex-col items-center gap-0.5 text-zinc-550 hover:text-zinc-300 cursor-pointer">
+          <Phone className="w-4.5 h-4.5" />
+          <span className="text-[8px] font-bold tracking-wider">Calls</span>
+        </button>
+
+        {/* Plus Button - Create Chat */}
+        <button
+          onClick={onOpenCreateChat}
+          className="w-10 h-10 -translate-y-2.5 rounded-full bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-600/30 active:scale-95 cursor-pointer"
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+
+        {/* Notifications Tab */}
+        <button className="flex flex-col items-center gap-0.5 text-zinc-550 hover:text-zinc-300 cursor-pointer">
+          <Bell className="w-4.5 h-4.5" />
+          <span className="text-[8px] font-bold tracking-wider">Alerts</span>
+        </button>
+
+        {/* Settings Tab */}
+        <button
+          onClick={onOpenProfile}
+          className="flex flex-col items-center gap-0.5 text-zinc-550 hover:text-zinc-300 cursor-pointer"
+        >
+          <Settings className="w-4.5 h-4.5" />
+          <span className="text-[8px] font-bold tracking-wider">Settings</span>
+        </button>
       </div>
     </div>
   );
