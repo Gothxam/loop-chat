@@ -153,7 +153,28 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     socket.on('message:seen', (data: { messageId: string; userId: string; chatId: string }) => {
-      queryClient.invalidateQueries({ queryKey: ['messages', data.chatId] });
+      queryClient.setQueryData(['messages', data.chatId], (oldData: any) => {
+        if (!oldData) return oldData;
+        const messagesList = oldData.messages || [];
+        const updatedMessages = messagesList.map((msg: any) => {
+          if (msg._id === data.messageId) {
+            const receipts = msg.receipts || [];
+            const exists = receipts.some((r: any) => {
+              const rUserId = typeof r.userId === 'object' ? r.userId._id : r.userId;
+              return rUserId === data.userId;
+            });
+            const newReceipts = exists
+              ? receipts.map((r: any) => {
+                  const rUserId = typeof r.userId === 'object' ? r.userId._id : r.userId;
+                  return rUserId === data.userId ? { ...r, status: 'seen' } : r;
+                })
+              : [...receipts, { messageId: data.messageId, userId: data.userId, status: 'seen' }];
+            return { ...msg, receipts: newReceipts };
+          }
+          return msg;
+        });
+        return { ...oldData, messages: updatedMessages };
+      });
       queryClient.invalidateQueries({ queryKey: ['chats'] });
     });
 

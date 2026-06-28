@@ -125,19 +125,23 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, activeChatId]);
 
-  // Enforce strict focus-and-visibility-based seen receipts
+  // Enforce strict visibility-based seen receipts
   useEffect(() => {
     const markAsSeen = () => {
       const socket = getSocket();
-      const isWindowFocused = typeof document !== 'undefined' && document.hasFocus() && document.visibilityState === 'visible';
-      if (isWindowFocused && socket && activeChatId && messages.length > 0 && user) {
-        const unreadMessages = messages.filter(
-          (m) =>
-            m.senderId !== user._id &&
-            typeof m.senderId === 'object' &&
-            m.senderId._id !== user._id &&
-            !m.receipts.some((r) => r.userId === user._id && r.status === 'seen')
-        );
+      const isVisible = typeof document !== 'undefined' && document.visibilityState === 'visible';
+      if (isVisible && socket && activeChatId && messages.length > 0 && user) {
+        const unreadMessages = messages.filter((m) => {
+          const isSenderMe = typeof m.senderId === 'object' ? m.senderId._id === user._id : m.senderId === user._id;
+          if (isSenderMe) return false;
+
+          const hasSeen = m.receipts?.some((r) => {
+            const receiptUserId = typeof r.userId === 'object' ? r.userId._id : r.userId;
+            return receiptUserId === user._id && r.status === 'seen';
+          });
+
+          return !hasSeen;
+        });
 
         unreadMessages.forEach((msg) => {
           socket.emit('message:seen', { messageId: msg._id, chatId: activeChatId });
