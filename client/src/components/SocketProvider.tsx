@@ -26,15 +26,28 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
+    const handleFocusChange = (focused: boolean) => {
+      if (socket && socket.connected) {
+        socket.emit('user:focus_state', { focused });
+      }
+    };
+
+    const onFocus = () => handleFocusChange(true);
+    const onBlur = () => handleFocusChange(false);
+
     socket.on('connect', () => {
       socket.emit('user:active_state', { active: document.visibilityState === 'visible' });
+      socket.emit('user:focus_state', { focused: document.hasFocus() });
     });
 
     if (socket.connected) {
       socket.emit('user:active_state', { active: document.visibilityState === 'visible' });
+      socket.emit('user:focus_state', { focused: document.hasFocus() });
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('blur', onBlur);
 
     // Bind event listeners
     socket.on('user:status', (data: { userId: string; status: 'online' | 'offline'; lastSeen?: string }) => {
@@ -94,6 +107,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       // Trigger web notifications if browser is minimized / not focused
       // and the sender is not the current user
       if (user && message.senderId._id !== user._id) {
+        socket.emit('message:ack', { messageId: message._id, chatId: message.chatId });
         triggerNotification(message);
       }
     });
@@ -206,6 +220,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('blur', onBlur);
       window.removeEventListener('message', handleSWMessage);
       disconnectSocket();
     };

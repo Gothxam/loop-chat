@@ -80,7 +80,9 @@ export interface IStorageProvider {
 // Local storage helper
 export const getFileUrl = (fileName: string, category: string, req: any): string => {
   const host = req.get('host');
-  const protocol = req.protocol;
-  // Return the static asset URL, e.g. http://localhost:5000/uploads/images/filename.jpg
+  // If not localhost, force HTTPS since production environments are always HTTPS
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
+  const protocol = isLocal ? req.protocol : 'https';
+  // Return the static asset URL
   return `${protocol}://${host}/uploads/${category}/${fileName}`;
 };

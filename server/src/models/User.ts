@@ -6,8 +6,10 @@ export interface IUser {
   email: string;
   passwordHash: string;
   photo?: string;
-  status: 'online' | 'offline';
+  status: 'online' | 'away' | 'busy' | 'offline';
   lastSeen: Date;
+  lastActivity: Date;
+  windowFocused: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,12 +45,20 @@ const UserSchema = new Schema<IUser>(
     },
     status: {
       type: String,
-      enum: ['online', 'offline'],
+      enum: ['online', 'away', 'busy', 'offline'],
       default: 'offline',
     },
     lastSeen: {
       type: Date,
       default: Date.now,
+    },
+    lastActivity: {
+      type: Date,
+      default: Date.now,
+    },
+    windowFocused: {
+      type: Boolean,
+      default: true,
     },
   },
   {

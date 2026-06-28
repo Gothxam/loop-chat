@@ -103,7 +103,7 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
 
             const populatedReceipt = await newReceipt.populate('userId', 'name photo');
 
-            const senderIdStr = typeof msg.senderId === 'object' ? (msg.senderId as any)._id?.toString() : msg.senderId.toString();
+            const senderIdStr = msg.senderId.toString();
             io.to(senderIdStr).emit('message:delivered', {
               messageId: msg._id.toString(),
               userId: targetUserId,
@@ -161,21 +161,54 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
     socket.join(userId);
 
     // Track active/inactive visibility state from user client
-    socket.on('user:active_state', (data: { active: boolean }) => {
+    socket.on('user:active_state', async (data: { active: boolean }) => {
       console.log(`Socket visibility changed: ${socket.id} (User: ${userId}) -> ${data.active ? 'Visible' : 'Hidden'}`);
       if (data.active) {
         inactiveSockets.delete(socket.id);
       } else {
         inactiveSockets.add(socket.id);
       }
+
+      // Re-evaluate user status: online if at least one visible connection exists, else away
+      const hasVisible = hasVisibleConnection(userId);
+      const newStatus = hasVisible ? 'online' : 'away';
+
+      try {
+        const now = new Date();
+        await User.findByIdAndUpdate(userId, { status: newStatus, lastActivity: now });
+        io.emit('user:status', {
+          userId,
+          status: newStatus,
+          lastActivity: now,
+        });
+      } catch (err) {
+        console.error('Error updating presence on active_state:', err);
+      }
+    });
+
+    // Track focused/blurred window state from user client
+    socket.on('user:focus_state', async (data: { focused: boolean }) => {
+      try {
+        const now = new Date();
+        await User.findByIdAndUpdate(userId, { windowFocused: data.focused, lastActivity: now });
+        io.emit('user:focus_status', {
+          userId,
+          windowFocused: data.focused,
+          lastActivity: now,
+        });
+      } catch (err) {
+        console.error('Error updating windowFocused on focus_state:', err);
+      }
     });
 
     // Set user status to online and broadcast
     try {
-      await User.findByIdAndUpdate(userId, { status: 'online' });
+      const now = new Date();
+      await User.findByIdAndUpdate(userId, { status: 'online', lastActivity: now });
       socket.broadcast.emit('user:status', {
         userId,
         status: 'online',
+        lastActivity: now,
       });
     } catch (err) {
       console.error('Error updating user presence on connect:', err);
@@ -433,6 +466,40 @@ export const initializeSocket = (httpServer: HttpServer, clientUrl: string | str
         }
       } catch (err) {
         console.error('Error handling message:seen:', err);
+      }
+    });
+
+    // Event: Acknowledgment (Delivered Receipt)
+    socket.on('message:ack', async (data: { messageId: string; chatId: string }) => {
+      try {
+        const { messageId, chatId } = data;
+
+        // Upsert delivered receipt (only if not already marked seen)
+        const existingReceipt = await MessageReceipt.findOne({ messageId, userId });
+        if (existingReceipt && existingReceipt.status === 'seen') {
+          return;
+        }
+
+        const receipt = await MessageReceipt.findOneAndUpdate(
+          { messageId, userId },
+          { status: 'delivered' },
+          { upsert: true, new: true }
+        ).populate('userId', 'name photo');
+
+        const chat = await Chat.findById(chatId);
+        if (chat) {
+          const participantIds = chat.participants.map(id => id.toString());
+          participantIds.forEach((pId) => {
+            io.to(pId).emit('message:delivered', {
+              messageId,
+              userId,
+              chatId,
+              receipt,
+            });
+          });
+        }
+      } catch (err) {
+        console.error('Error handling message:ack:', err);
       }
     });
 

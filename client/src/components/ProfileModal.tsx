@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Camera, Save, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -18,7 +18,24 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [autoStart, setAutoStart] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined' && (window as any).electronAPI?.getAutoStart) {
+      (window as any).electronAPI.getAutoStart().then((enabled: boolean) => {
+        setAutoStart(enabled);
+      });
+    }
+  }, [isOpen]);
+
+  const handleAutoStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setAutoStart(checked);
+    if (typeof window !== 'undefined' && (window as any).electronAPI?.toggleAutoStart) {
+      (window as any).electronAPI.toggleAutoStart(checked);
+    }
+  };
 
   if (!isOpen || !user) return null;
 
@@ -199,6 +216,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
               className="w-full bg-zinc-950 border border-zinc-850 text-zinc-100 px-4 py-2.5 rounded-xl outline-none focus:border-zinc-700 transition-all"
             />
           </div>
+
+          {/* Auto Start Preference */}
+          {typeof window !== 'undefined' && (window as any).electronAPI && (
+            <div className="flex items-center gap-2.5 py-1 select-none">
+              <input
+                id="autoStartCheckbox"
+                type="checkbox"
+                checked={autoStart}
+                onChange={handleAutoStartChange}
+                className="w-4 h-4 bg-zinc-950 border border-zinc-800 rounded focus:ring-purple-500/20 text-purple-600 outline-none cursor-pointer"
+              />
+              <label htmlFor="autoStartCheckbox" className="text-xs text-zinc-300 cursor-pointer font-medium">
+                Start Loop Chat when Windows starts
+              </label>
+            </div>
+          )}
 
           {/* Submit */}
           <button

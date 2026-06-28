@@ -123,22 +123,39 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, activeChatId]);
 
-    // Emit seen receipts for all unread messages
-    const socket = getSocket();
-    if (socket && activeChatId && messages.length > 0 && user) {
-      const unreadMessages = messages.filter(
-        (m) =>
-          m.senderId !== user._id &&
-          typeof m.senderId === 'object' &&
-          m.senderId._id !== user._id &&
-          !m.receipts.some((r) => r.userId === user._id && r.status === 'seen')
-      );
+  // Enforce strict focus-and-visibility-based seen receipts
+  useEffect(() => {
+    const markAsSeen = () => {
+      const socket = getSocket();
+      const isWindowFocused = typeof document !== 'undefined' && document.hasFocus() && document.visibilityState === 'visible';
+      if (isWindowFocused && socket && activeChatId && messages.length > 0 && user) {
+        const unreadMessages = messages.filter(
+          (m) =>
+            m.senderId !== user._id &&
+            typeof m.senderId === 'object' &&
+            m.senderId._id !== user._id &&
+            !m.receipts.some((r) => r.userId === user._id && r.status === 'seen')
+        );
 
-      unreadMessages.forEach((msg) => {
-        socket.emit('message:seen', { messageId: msg._id, chatId: activeChatId });
-      });
-    }
+        unreadMessages.forEach((msg) => {
+          socket.emit('message:seen', { messageId: msg._id, chatId: activeChatId });
+        });
+      }
+    };
+
+    // Run seen check immediately
+    markAsSeen();
+
+    // Re-check when window gains focus or visibility state changes
+    window.addEventListener('focus', markAsSeen);
+    document.addEventListener('visibilitychange', markAsSeen);
+
+    return () => {
+      window.removeEventListener('focus', markAsSeen);
+      document.removeEventListener('visibilitychange', markAsSeen);
+    };
   }, [messages, activeChatId, user]);
 
   // Handle local typing indicator logic
