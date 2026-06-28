@@ -357,10 +357,10 @@ export const ChatArea: React.FC = () => {
 
                   {/* Bubble */}
                   <div
-                    className={`p-3 rounded-2xl border text-xs leading-relaxed transition-all shadow-sm relative ${
+                    className={`p-3 rounded-2xl text-xs leading-relaxed transition-all shadow-sm relative ${
                       isMe
-                        ? 'bg-zinc-100 border-zinc-200 text-zinc-950 rounded-tr-none font-medium'
-                        : 'bg-zinc-900 border-zinc-850 text-zinc-100 rounded-tl-none'
+                        ? 'bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 border border-transparent text-white rounded-tr-none font-semibold'
+                        : 'bg-[#18181b] border border-zinc-800 text-zinc-100 rounded-tl-none'
                     }`}
                   >
                     {/* Inline File attachment */}
@@ -404,16 +404,16 @@ export const ChatArea: React.FC = () => {
                     )}
 
                     {/* Footer receipt indicators & timestamp */}
-                    <div className={`flex items-center justify-end gap-1 mt-1.5 text-[8px] ${isMe ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    <div className={`flex items-center justify-end gap-1 mt-1.5 text-[8px] ${isMe ? 'text-zinc-200/85' : 'text-zinc-450'}`}>
                       <span>
                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {isMe && (
                         <span>
                           {msg.receipts?.some((r) => r.status === 'seen') ? (
-                            <CheckCheck className="w-3 h-3 text-blue-600 font-bold" />
+                            <CheckCheck className="w-3 h-3 text-cyan-200 font-bold" />
                           ) : (
-                            <Check className="w-3 h-3 text-zinc-400" />
+                            <Check className="w-3 h-3 text-white/50" />
                           )}
                         </span>
                       )}
