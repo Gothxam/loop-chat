@@ -52,11 +52,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#070709] text-zinc-100">
+    <div className="flex h-[100dvh] w-screen overflow-hidden bg-[#070709] text-zinc-100">
       {/* Workspace content wrapper */}
       <div className="flex-1 flex h-full relative z-10">
         {/* Leftmost Navigation Rail */}
-        <div className={`h-full shrink-0 ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
+        <div className="hidden md:flex h-full shrink-0">
           <NavigationRail
             onOpenProfile={() => setIsProfileOpen(true)}
             onOpenCreateChat={() => setIsChatOpen(true)}

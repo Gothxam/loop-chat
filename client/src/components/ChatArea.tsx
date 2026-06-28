@@ -426,17 +426,18 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
       </div>
 
       {/* Messages Window */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 flex flex-col">
         {loadingMessages ? (
           <div className="flex flex-col items-center justify-center h-full gap-2">
             <div className="w-8 h-8 border-2 border-zinc-800 border-t-zinc-400 rounded-full animate-spin" />
             <span className="text-xs text-zinc-500">Loading messages...</span>
           </div>
         ) : messages.length > 0 ? (
-          messages.map((msg) => {
-            const sender = typeof msg.senderId === 'object' ? msg.senderId : { _id: msg.senderId, name: 'User', photo: '' };
-            const isMe = sender._id === user?._id;
-            const hasReactions = msg.reactions && msg.reactions.length > 0;
+          <div className="mt-auto space-y-4 flex flex-col">
+            {messages.map((msg) => {
+              const sender = typeof msg.senderId === 'object' ? msg.senderId : { _id: msg.senderId, name: 'User', photo: '' };
+              const isMe = sender._id === user?._id;
+              const hasReactions = msg.reactions && msg.reactions.length > 0;
 
             return (
               <div
@@ -605,10 +606,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ onOpenCreateChat, onOpenCrea
                 )}
               </div>
             );
-          })
-        ) : (
-          <div className="text-center text-zinc-500 py-10 text-xs">No messages yet. Send a message to start!</div>
-        )}
+          })}
+        </div>
+      ) : (
+        <div className="text-center text-zinc-500 py-10 mt-auto text-xs">No messages yet. Send a message to start!</div>
+      )}
         <div ref={messagesEndRef} />
       </div>
 
