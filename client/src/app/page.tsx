@@ -19,13 +19,26 @@ export default function DashboardPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isGroupOpen, setIsGroupOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    const checkHydration = () => {
+      if (useAuthStore.persist.hasHydrated()) {
+        setHydrated(true);
+      } else {
+        setTimeout(checkHydration, 10);
+      }
+    };
+    checkHydration();
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     setMounted(true);
     if (!isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [hydrated, isAuthenticated, router]);
 
   if (!mounted || !isAuthenticated) {
     return (
